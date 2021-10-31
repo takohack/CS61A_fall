@@ -80,10 +80,10 @@ def accuracy(typed, reference):
     j = 0
     while i < len(reference_words) and i < len(typed_words):
         if typed_words[i] == reference_words[i]:
-            j+=1
-            i+=1
+            j += 1
+            i += 1
         else:
-            i+=1
+            i += 1
     if len(typed_words) == 0:
         return 0.0
     else:
@@ -98,7 +98,7 @@ def wpm(typed, elapsed):
     "*** YOUR CODE HERE ***"
 
     lens = len(typed)
-    if lens ==0:
+    if lens == 0:
         return 0.0
     return (lens/5.0)/(elapsed/60)
     # END PROBLEM 4
@@ -125,8 +125,9 @@ def autocorrect(user_word, valid_words, diff_function, limit):
     #     return user_word
     # else:
     #     return choose
-    similar_word = min(valid_words,key=lambda w:diff_function(user_word,w,limit))
-    if diff_function(user_word,similar_word,limit) > limit:
+    similar_word = min(
+        valid_words, key=lambda w: diff_function(user_word, w, limit))
+    if diff_function(user_word, similar_word, limit) > limit:
         return user_word
     else:
         return similar_word
@@ -144,13 +145,13 @@ def shifty_shifts(start, goal, limit):
         return len(goal)
     if len(goal) == 0:
         return len(start)
-    
+
     if start[0] == goal[0]:
-        return shifty_shifts(start[1:],goal[1:],limit)
+        return shifty_shifts(start[1:], goal[1:], limit)
     else:
         if limit == 0:
             return 1
-        return 1+shifty_shifts(start[1:],goal[1:],limit-1)
+        return 1+shifty_shifts(start[1:], goal[1:], limit-1)
     # END PROBLEM 6
 
 
@@ -164,14 +165,12 @@ def pawssible_patches(start, goal, limit):
     elif start[0] == goal[0]:
         return pawssible_patches(start[1:], goal[1:], limit)
     else:
-        add_diff = pawssible_patches(start,goal[1:],limit-1)
-        remove_diff = pawssible_patches(start[1:],goal,limit-1)
-        sub_diff = pawssible_patches(start[1:],goal[1:],limit-1)
+        add_diff = pawssible_patches(start, goal[1:], limit-1)
+        remove_diff = pawssible_patches(start[1:], goal, limit-1)
+        sub_diff = pawssible_patches(start[1:], goal[1:], limit-1)
 
-        return 1 + min(min(add_diff,remove_diff),sub_diff)
+        return 1 + min(min(add_diff, remove_diff), sub_diff)
 
-
-    
         # END
     # elif  start[0] != goal[0] and start[1] == goal[0]:# Feel free to remove or add additional cases
     #     # BEGIN
@@ -204,7 +203,21 @@ def final_diff(start, goal, limit):
 def report_progress(typed, prompt, user_id, send):
     """Send a report of your id and progress so far to the multiplayer server."""
     # BEGIN PROBLEM 8
-    "*** YOUR CODE HERE ***"
+    # "*** YOUR CODE HERE ***"
+    i = 0
+    total = 0
+    for item in typed:
+        # print(typed[i])
+        if item == prompt[i]:
+            i += 1
+            total += 1
+        else:
+            break
+    progress = total/len(prompt)
+
+    map = {'id': user_id, 'progress': progress}
+    send(map)
+    print(progress)
     # END PROBLEM 8
 
 
@@ -230,7 +243,22 @@ def time_per_word(times_per_player, words):
         words: a list of words, in the order they are typed.
     """
     # BEGIN PROBLEM 9
-    "*** YOUR CODE HERE ***"
+    # play1 = times_per_player[0]
+    # play2 = times_per_player[1]
+    # res = []
+    # res2 = []
+    # i = 0
+    # for i in range(0, len(play1)-1):
+    #     res.append(play1[i+1]-play1[i])
+    #     res2.append(play2[i+1]-play2[i])
+    # return game(words,[res, res2])
+    time = []
+    for item in times_per_player:
+        tmp = []
+        for i in range(len(item) - 1):
+            tmp.append(item[i+1]-item[i])
+        time.append(tmp)
+    return game(words, time)
     # END PROBLEM 9
 
 
@@ -242,19 +270,41 @@ def fastest_words(game):
     Returns:
         a list of lists containing which words each player typed fastest
     """
-    player_indices = range(len(all_times(game)))  # contains an *index* for each player
-    word_indices = range(len(all_words(game)))    # contains an *index* for each word
+    player_indices = range(len(all_times(game))
+                           )  # contains an *index* for each player
+    # contains an *index* for each word
+    word_indices = range(len(all_words(game)))
     # BEGIN PROBLEM 10
-    "*** YOUR CODE HERE ***"
+    # 找第一个player1
+    res = []
+
+    for i in player_indices:
+        temp = []
+        # i代表第i个人 搜索一个数组长度找到最小的
+        for j in word_indices:
+            small = 99
+            index = 0
+            for m in player_indices:
+                if all_times(game)[m][j] < small:
+                    small = all_times(game)[m][j]
+                    index = m
+            if index == i:
+                temp.append(word_at(game, j))
+        res.append(temp)
+    return res
     # END PROBLEM 10
 
 
 def game(words, times):
     """A data abstraction containing all words typed and their times."""
-    assert all([type(w) == str for w in words]), 'words should be a list of strings'
-    assert all([type(t) == list for t in times]), 'times should be a list of lists'
-    assert all([isinstance(i, (int, float)) for t in times for i in t]), 'times lists should contain numbers'
-    assert all([len(t) == len(words) for t in times]), 'There should be one word per time.'
+    assert all([type(w) == str for w in words]
+               ), 'words should be a list of strings'
+    assert all([type(t) == list for t in times]
+               ), 'times should be a list of lists'
+    assert all([isinstance(i, (int, float))
+               for t in times for i in t]), 'times lists should contain numbers'
+    assert all([len(t) == len(words) for t in times]
+               ), 'There should be one word per time.'
     return [words, times]
 
 
@@ -285,7 +335,8 @@ def game_string(game):
     """A helper function that takes in a game object and returns a string representation of it"""
     return "game(%s, %s)" % (game[0], game[1])
 
-enable_multiplayer = False  # Change to True when you're ready to race.
+
+enable_multiplayer = True  # Change to True when you're ready to race.
 
 ##########################
 # Command Line Interface #
@@ -295,7 +346,7 @@ enable_multiplayer = False  # Change to True when you're ready to race.
 def run_typing_test(topics):
     """Measure typing speed and accuracy on the command line."""
     paragraphs = lines_from_file('data/sample_paragraphs.txt')
-    select = lambda p: True
+    def select(p): return True
     if topics:
         select = about(topics)
     i = 0
